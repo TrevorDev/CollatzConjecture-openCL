@@ -15,10 +15,9 @@ int main(){
     cl_platform_id* clSelectedPlatformID = NULL;  
 	int err;                            // error code returned from api calls
       
-    float data[DATA_SIZE];              // original data set given to device
-    float results[DATA_SIZE];           // results returned from device
+    int data[DATA_SIZE];              // original data set given to device
+    int results[DATA_SIZE];           // results returned from device
     unsigned int correct;               // number of correct results returned
- 
     size_t global;                      // global domain size for our calculation
     size_t local;                       // local domain size for our calculation
  
@@ -31,30 +30,45 @@ int main(){
     cl_mem input;                       // device memory used for the input array
     cl_mem output;                      // device memory used for the output array
     
-    // Fill our data set with random float values
+    // Fill our data set with random int values
     int i = 0;
     unsigned int count = DATA_SIZE;
     for(i = 0; i < count; i++)
-        data[i] = rand() / (float)RAND_MAX;
+        data[i] = (rand()%10)+1;
 
 
 	////////////////////////////////////////////////////////////////////////////////
 	 
 	// Simple compute kernel which computes the square of an input array 
 	//
-	const char *KernelSource = "\n" \
-	"__kernel void square(                                                       \n" \
-	"   __global float* input,                                              \n" \
-	"   __global float* output,                                             \n" \
-	"   const unsigned int count)                                           \n" \
-	"{                                                                      \n" \
-	"   int i = get_global_id(0);                                           \n" \
-	"   if(i < count) {                                                     \n" \
-	"       output[i] = input[i] * input[i];                                \n" \
-	"   }                                                                   \n" \
-	"                                                                       \n" \
-	"}                                                                      \n" \
-	"\n";
+	const char *KernelSource =
+	"__kernel void square(                                                  \
+	   __global int* input,                                                 \
+	   __global int* output,                                                \
+	   const unsigned int count)                                            \
+	{                                                                       \
+	   int cur;                                                             \
+       int counter=0;                                                       \
+	   int i = get_global_id(0);                                            \
+	   if(i < count) {                                                      \
+	       cur = input[i];                                                  \
+	       while(cur!=1){                                                   \
+            counter++;                                                      \
+	       	if(cur%2==0){                                                   \
+	       		cur=cur/2;                                                  \
+	       	}else{                                                          \
+	       		cur=(cur*3)+1;                                              \
+	       	}                                                               \
+            if(counter>25){                                                 \
+                break;                                                      \
+            }                                                               \
+	       }                                                                \
+	       output[i] = counter;                                             \
+	   }                                                                    \
+	}                                                                       \
+	                                                                        \
+	                                                                        \
+	";
 	 
 	////////////////////////////////////////////////////////////////////////////////
 
@@ -195,8 +209,10 @@ int main(){
     //timer t = createTimer();
     for(i = 0; i < count; i++)
     {
-        if(results[i] == data[i] * data[i])
+        if(results[i] > 19){//data[i] * data[i])
             correct++;
+            print("%d",data[i]);
+        }
     }
     //print("TIME- %f",getTime(t));
 
