@@ -31,6 +31,19 @@ vector * createVector(){
 	return ret;
 }
 
+//FILE IO
+char * fileToString(char * filename){
+	char * ret;
+	long input_file_size;
+	FILE * input_file = fopen(filename,"r");
+	fseek(input_file, 0, SEEK_END);
+	input_file_size = ftell(input_file);
+	rewind(input_file);
+	ret = malloc(input_file_size * (sizeof(char)));
+	fread(ret, sizeof(char), input_file_size, input_file);
+	fclose(input_file);
+	return ret;
+}
 
 //STRINGS
 char * strAdd(char * a,char * b){

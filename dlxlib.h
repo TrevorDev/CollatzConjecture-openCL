@@ -31,6 +31,8 @@ double dlxlibVersion();
 
 vector * createVector();
 
+char * fileToString(char * filename);
+
 char * dupStr(char * str);
 char * strAdd(char * a,char * b);
 int * strToInt(char * str);
