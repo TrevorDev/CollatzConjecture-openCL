@@ -41,40 +41,8 @@ int main(){
 	 
 	// Simple compute kernel which computes the square of an input array 
 	//
-	const char *KernelSource =
-	"__kernel void square(                                                  \
-	   __global int* input,                                                 \
-	   __global int* output,                                                \
-	   const unsigned int count)                                            \
-	{                                                                       \
-	   int cur;                                                             \
-       int counter=0;                                                       \
-	   int i = get_global_id(0);                                            \
-	   if(i < count) {                                                      \
-	       cur = input[i];                                                  \
-	       while(cur!=1){                                                   \
-            counter++;                                                      \
-	       	if(cur%2==0){                                                   \
-	       		cur=cur/2;                                                  \
-	       	}else{                                                          \
-	       		cur=(cur*3)+1;                                              \
-	       	}                                                               \
-            if(counter>25){                                                 \
-                break;                                                      \
-            }                                                               \
-	       }                                                                \
-	       output[i] = counter;                                             \
-	   }                                                                    \
-	}                                                                       \
-	                                                                        \
-	                                                                        \
-	";
-	 
-	////////////////////////////////////////////////////////////////////////////////
-
-
-
-
+	const char *KernelSource = fileToString("gpuFunctions.c");
+    
 	//get Platform
 	clGetPlatformIDs(0, NULL, &numPlatforms);
 	clSelectedPlatformID = (cl_platform_id*)malloc(sizeof(cl_platform_id)*numPlatforms);
@@ -209,9 +177,8 @@ int main(){
     //timer t = createTimer();
     for(i = 0; i < count; i++)
     {
-        if(results[i] > 19){//data[i] * data[i])
+        if(results[i] >= 0){//data[i] * data[i])
             correct++;
-            print("%d",data[i]);
         }
     }
     //print("TIME- %f",getTime(t));
