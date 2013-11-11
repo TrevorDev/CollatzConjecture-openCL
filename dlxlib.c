@@ -1,3 +1,9 @@
+/********
+dlxlib.c
+summary: commonly used functions for c programming
+author: Trevor Baron
+date: Nov 11 2013
+********/
 #include "dlxlib.h"
 
 //INFO

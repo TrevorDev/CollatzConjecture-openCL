@@ -1,6 +1,8 @@
 /********
 dlxlib.h -- header file for dlxlib.c
+summary: commonly used functions for c programming
 author: Trevor Baron
+date: Nov 11 2013
 ********/
 #ifndef DLXLIB_H
 #define DLXLIB_H 1
