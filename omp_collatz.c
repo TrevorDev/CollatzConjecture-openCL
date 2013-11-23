@@ -12,12 +12,8 @@ int steps = 0, limit = 0, percent = 0;
 
 /*
 pN: no. of processors (threads) to use
-bN: width of board >1, so board size is N x N cells
-tN: width of one overlay tile, each N x N cells (b mod t=0)
-cN: max. colour density in integer percent, 1-100 (stopping condition)
-mN: max. no. of full steps (additional stopping condition)
 sN: optional random seed
-iMode: optional interactive mode switch 1 - on / 0 - off
+aN: size of array
 */
 
 int pN, sN;
@@ -91,130 +87,11 @@ int main(int argc, char *argv[])
   }
 
   printData(size);
-
-/*  #pragma omp parallel private(nthreads, tid)
-  {
-    tid = omp_get_thread_num();
-    printf("Hello World from thread = %d\n", tid);
-
-    if (tid == 0) 
-    {
-      nthreads = omp_get_num_threads();
-      printf("Number of threads = %d\n", nthreads);
-    }
-  }*/  /* All threads join master thread and disband */
-
-/*
-  do
-  {
-    // red movement
-    #pragma omp parallel for collapse(2) private(i, j) firstprivate(bN) shared(board, tempBoard)
-    for (i = 0; i < bN; i++)
-    {
-      for (j = 0; j < bN; j++)
-      {
-        if (board[i][j] == 2)
-        {
-          tempBoard[i][j] = 2;
-        }
-        else if (board[i][j] == 1 && board[i][(j+1)%bN] == 0)
-        {
-          tempBoard[i][(j+1)%bN] = 1;
-        }
-        else if (board[i][j] == 1)
-        {
-          tempBoard[i][j] = 1;
-        }
-      }
-    }
-
-    #pragma omp parallel for collapse(2) private(i, j) firstprivate(bN) shared(board)
-    for (i = 0; i < bN; i++)
-    {
-      for (j = 0; j < bN; j++)
-      {
-        board[i][j] = 0;
-      }
-    }
-
-    // blue movement 
-    #pragma omp parallel for collapse(2) private(i, j) firstprivate(bN) shared(board, tempBoard)
-    for (i = 0; i < bN; i++)
-    {
-      for (j = 0; j < bN; j++)
-      {
-        if (tempBoard[i][j] == 1)
-        {
-          board[i][j] = 1;
-        }
-        else if (tempBoard[i][j] == 2 && tempBoard[(i+1)%bN][j] == 0)
-        {
-          board[(i+1)%bN][j] = 2;
-        }
-        else if (tempBoard[i][j] == 2)
-        {
-          board[i][j] = 2;
-        }
-      }
-    }
-
-    #pragma omp parallel for collapse(2) private(i, j) firstprivate(bN) shared(tempBoard)
-    for (i = 0; i < bN; i++)
-    {
-      for (j = 0; j < bN; j++)
-      {
-        tempBoard[i][j] = 0;
-      }
-    }
-
-    #pragma omp parallel for private(i, j, k, myPercent, rCount, bCount, myRow, myCol) firstprivate(tN) shared(board, percent, limit)
-    for (i = 0; i < numOfBoard; i++)
-    {
-      int localLimit = 0;
-      if (localLimit == 0)
-      {
-        myPercent = 0;
-        rCount = 0;
-        bCount = 0;
-        myRow = i / (bN / tN) * tN;
-        myCol = (i * tN) % bN;
-      
-        for (j = myRow; j < myRow+tN; j++)
-        {
-          for (k = myCol; k < myCol+tN; k++)
-          {
-            if (board[j][k] == 1)
-              rCount++;
-            else if (board[j][k] == 2)
-              bCount++;
-          }
-        }
-      
-        if (rCount >= bCount)
-        {
-          myPercent = (int) ((float) rCount / (tN*tN) * 100);
-        }
-        else
-        {
-          myPercent = (int) ((float) bCount / (tN*tN) * 100);
-        }
-      
-        if (myPercent >= cN)
-        {
-          percent = myPercent;
-          localLimit = 1;
-          limit = localLimit;
-        }
-      }
-    }
-    steps++;
-  } while (steps < mN && limit == 0);
-*/
   // writing
-  /*
+  
   for (i = 1; i < argc; i++)
     printf("%s ",--argv[i]);
-  printf(" ");*/
+  printf(" ");
   stop = omp_get_wtime();
   //printf("Iterations: %d Termination Percent: %d Time: %f\n", steps, percent, (double)(stop - start));
   //writeToFile();
