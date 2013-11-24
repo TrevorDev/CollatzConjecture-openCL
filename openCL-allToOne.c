@@ -45,7 +45,6 @@ void initData(int data[]){
         srand(time(NULL));
     }else{
         srand(*seed);
-        free(seed);
     }
 
     for(int i = 0; i < DATA_SIZE; i++) {
