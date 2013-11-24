@@ -14,6 +14,7 @@ int steps = 0, limit = 0, percent = 0;
 pN: no. of processors (threads) to use
 sN: optional random seed
 aN: size of array
+
 */
 
 int pN, sN;
@@ -23,14 +24,16 @@ int main(int argc, char *argv[])
 {
   int i;
   double start, stop;
-
-  int size, counter;
+  int size, counter, findNum;
   int nthreads, tid;
-
+  int position;
+  findNum = 0;
+  size = 0;
   if (argc == 1)
   {
-    printf("please provide correct arguments (p for process s for seed)\n");
-    printf("eg: pN sN aN        (Replace N with number)\n");
+    printf("please provide correct arguments\n");
+    printf("'p' for process, 'f' for aiming number to find, 's' for seed, 'a' for array size\n");
+    printf("eg: pN fN or (aN and sN) (Replace N with number)\n");
     exit(0);
   }
 
@@ -39,54 +42,104 @@ int main(int argc, char *argv[])
     if (argv[i][0] == 'p')
     {
       pN = atoi(++argv[i]);
-      printf("pN %d\n",pN);
+      continue;
+    }
+
+    if (argv[i][0] == 'f')
+    {
+      findNum = atoi(++argv[i]);
       continue;
     }
 
     if (argv[i][0] == 's')
     {
       sN = atoi(++argv[i]);
-      printf("sN %d\n",sN);
       continue;
     }
 
     if (argv[i][0] == 'a')
     {
       size = atoi(++argv[i]);
-      printf("size %d\n",size);
       continue;
     }
   }
-
   start = omp_get_wtime();
-  InitializeData(size);
-  printData(size);
-  omp_set_num_threads(pN);
-  
-  #pragma omp parallel for private(i, counter)
+  size = 1024;
+  data = (int *) malloc (size*sizeof(int));
+  data[0] = 2;
+  position = 1;
   for (i = 0; i < size; i++)
   {
-    counter=0;
-    while(data[i] != 1)
+    if (data[i] != 0)
     {
-      counter++;
       if(data[i] % 2 == 0) 
       {
-        data[i] = data[i] / 2;
+        data[position++] = data[i]*2;
       }
-      else 
+      if(((data[i] - 1) / 3 ) % 2 != 0)
       {
-        data[i] = (data[i] * 3) + 1;
+        data[position++] = (data[i] - 1) / 3;
       }
-      if (counter > 25)
-      {
-        data[i] = 0;
-        break;
-      } 
     }
   }
+  for (i = 0; i < size; i++)
+  {
+    printf("%d ",data[i]);
+  }
+  printf("\n%d\n",position);
 
-  printData(size);
+  /*
+  if (findNum == 0)
+  {
+    InitializeData(size);
+    printData(size);
+    omp_set_num_threads(pN);
+    
+    #pragma omp parallel for private(i, counter)
+    for (i = 0; i < size; i++)
+    {
+      counter=0;
+      while(data[i] != 1)
+      {
+        counter++;
+        if(data[i] % 2 == 0) 
+        {
+          data[i] = data[i] / 2;
+        }
+        else 
+        {
+          data[i] = (data[i] * 3) + 1;
+        }
+        if (counter > 25)
+        {
+          data[i] = 0;
+          break;
+        } 
+      }
+    }
+
+    printData(size);
+  }
+  else
+  {
+    size = 1024;
+    data = (int *) malloc (size*sizeof(int));
+    data[0] = 2;
+    position = 1;
+    for (i = 0; i < size; i++)
+    {
+      if(data[i] % 2 == 0) 
+      {
+        data[position++] = data[i]*2;
+      }
+      else
+      {
+        data[position++] = (data[i] - 1) / 3;
+      }
+    }
+
+  }
+  */
   // writing
   
   for (i = 1; i < argc; i++)
