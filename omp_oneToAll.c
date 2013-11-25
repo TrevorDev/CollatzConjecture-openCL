@@ -1,3 +1,10 @@
+/********
+omp_oneToAll.c
+summary: Collatz Conjecture problem with one to all approach
+author: Heesung Ahn, Trevor Baron
+date: Nov 28 2013
+********/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>

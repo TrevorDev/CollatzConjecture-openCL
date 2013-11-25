@@ -1,3 +1,10 @@
+/********
+openCL-oneToAll.c
+summary: Collatz Conjecture problem with all to one approach
+author: Trevor Baron, Heesung Ahn
+date: Nov 28 2013
+********/
+
 #include <CL/cl.h>
 #include "dlxlib.h"
 #define DATA_SIZE (524288)
