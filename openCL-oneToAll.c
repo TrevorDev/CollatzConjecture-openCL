@@ -2,24 +2,19 @@
 #include "dlxlib.h"
 #define DATA_SIZE (524288)
 
-int arraySize = 1;
+int depth = 1;
 int rep = 1;
-int * seed = NULL;
 
 int parseArgs(int argc, char * argv[]){
     int repSet = 0;
-    int sizeSet = 0;
+    int depthSet = 0;
     for(int i=0;i<argc;i++){
         int num = atoi(argv[i]+1);
         switch( argv[i][0] ) 
         {
-        case 's':
-            seed = calloc(1,sizeof(int));
-            *seed=num;
-            break;
-        case 'n':
-            arraySize=num;
-            sizeSet=1;
+        case 'd':
+            depth=num;
+            depthSet=1;
             break;
         case 'r':
             rep=num;
@@ -29,15 +24,24 @@ int parseArgs(int argc, char * argv[]){
             break;
         }
     }
-    if(!sizeSet || !repSet){
-        printf("Invalid arguments, expected 2 or 3 args:\n");
+    if(!depthSet || !repSet || rep<=0||depth<0||depth>19){
+        printf("Invalid arguments, expected 2 args:\n");
         printf("r - number of repititions greater than 0(to increase runtime)\n");
-        printf("n - numbers to compute between 1 and 524288\n");
-        printf("s - random seed (optional leave out to seed by time)\n");
-        printf("Example execution ./openCL-allToOne r1 n8 s3 > output.txt\n");
+        printf("d - depth of reverse collatz tree to print out between 1 and 19\n");
+        printf("Example execution ./openCL-allToOne r1 d8 > output.txt\n");
         return 1;
     }
     return 0;
+}
+
+void initData(int data[]){
+    for(int i = 0; i < DATA_SIZE; i++) {
+        if(i==0){
+            data[i] = 1;
+        }else{
+            data[i] = 0;
+        }
+    }
 }
 
 int main(int argc, char *argv[]){
@@ -47,7 +51,6 @@ int main(int argc, char *argv[]){
       
     int data[DATA_SIZE];              // original data set given to device
     int results[DATA_SIZE];           // results returned from device
-    unsigned int correct;               // number of correct results returned
     size_t global;                      // global domain size for our calculation
     size_t local;                       // local domain size for our calculation
  
@@ -67,14 +70,9 @@ int main(int argc, char *argv[]){
     // Fill our data set with random int values
     unsigned int count = DATA_SIZE;
 
-    for(int i = 0; i < count; i++) {
-        if(i==0){
-            data[i] = 1;
-        }else{
-            data[i] = 0;
-        }
-    }
 
+
+    //printf("%d", data[0]);
 
 	////////////////////////////////////////////////////////////////////////////////
 	 
@@ -154,83 +152,84 @@ int main(int argc, char *argv[]){
         exit(1);
     }
     timer t = createTimer();
-    for(int i =0;i<rep;i++){
-        // Write our data set into the input array in device memory 
-        //
-        err = clEnqueueWriteBuffer(commands, input, CL_TRUE, 0, sizeof(float) * count, data, 0, NULL, NULL);
-        if (err != CL_SUCCESS)
-        {
-            printf("Error: Failed to write to source array!\n");
-            exit(1);
-        }
-     
-        // Set the arguments to our compute kernel
-        //
-        err = 0;
-        err  = clSetKernelArg(kernel, 0, sizeof(cl_mem), &input);
-        err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &output);
-        err |= clSetKernelArg(kernel, 2, sizeof(unsigned int), &count);
-        if (err != CL_SUCCESS)
-        {
-            printf("Error: Failed to set kernel arguments! %d\n", err);
-            exit(1);
-        }
-     
-        // Get the maximum work group size for executing the kernel on the device
-        //
-        err = clGetKernelWorkGroupInfo(kernel, device_id, CL_KERNEL_WORK_GROUP_SIZE, sizeof(local), &local, NULL);
-        if (err != CL_SUCCESS)
-        {
-            printf("Error: Failed to retrieve kernel work group info! %d\n", err);
-            exit(1);
-        }
-     
-        // Execute the kernel over the entire range of our 1d input data set
-        // using the maximum number of work group items for this device
-        //
-        
-        global = count;
-        err = clEnqueueNDRangeKernel(commands, kernel, 1, NULL, &global, &local, 0, NULL, NULL);
-        if (err)
-        {
-            printf("Error: Failed to execute kernel!\n");
-            return EXIT_FAILURE;
-        }
-     
-        // Wait for the command commands to get serviced before reading back results
-        //
-        clFinish(commands);
-     
-        // Read back the results from the device to verify the output
-        //
-        err = clEnqueueReadBuffer( commands, output, CL_TRUE, 0, sizeof(float) * count, results, 0, NULL, NULL );  
-        if (err != CL_SUCCESS)
-        {
-            printf("Error: Failed to read output array! %d\n", err);
-            exit(1);
+    for(int k =0;k<rep;k++){
+        initData(data);
+        for(int i =0;i<depth;i++){
+            // Write our data set into the input array in device memory 
+            //
+            err = clEnqueueWriteBuffer(commands, input, CL_TRUE, 0, sizeof(float) * count, data, 0, NULL, NULL);
+            if (err != CL_SUCCESS)
+            {
+                printf("Error: Failed to write to source array!\n");
+                exit(1);
+            }
+         
+            // Set the arguments to our compute kernel
+            //
+            err = 0;
+            err  = clSetKernelArg(kernel, 0, sizeof(cl_mem), &input);
+            err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &output);
+            err |= clSetKernelArg(kernel, 2, sizeof(unsigned int), &count);
+            if (err != CL_SUCCESS)
+            {
+                printf("Error: Failed to set kernel arguments! %d\n", err);
+                exit(1);
+            }
+         
+            // Get the maximum work group size for executing the kernel on the device
+            //
+            err = clGetKernelWorkGroupInfo(kernel, device_id, CL_KERNEL_WORK_GROUP_SIZE, sizeof(local), &local, NULL);
+            if (err != CL_SUCCESS)
+            {
+                printf("Error: Failed to retrieve kernel work group info! %d\n", err);
+                exit(1);
+            }
+         
+            // Execute the kernel over the entire range of our 1d input data set
+            // using the maximum number of work group items for this device
+            //
+            
+            global = count;
+            err = clEnqueueNDRangeKernel(commands, kernel, 1, NULL, &global, &local, 0, NULL, NULL);
+            if (err)
+            {
+                printf("Error: Failed to execute kernel!\n");
+                return EXIT_FAILURE;
+            }
+         
+            // Wait for the command commands to get serviced before reading back results
+            //
+            clFinish(commands);
+         
+            // Read back the results from the device to verify the output
+            //
+            err = clEnqueueReadBuffer( commands, output, CL_TRUE, 0, sizeof(float) * count, results, 0, NULL, NULL );  
+            if (err != CL_SUCCESS)
+            {
+                printf("Error: Failed to read output array! %d\n", err);
+                exit(1);
+            }
+            for(int j=0;j<results[0];j++){
+                data[j]=results[j];
+            }
         }
     }
     double timeEnd = getTime(t);
     
     // Validate our results
     //
-    correct = 0;
-    for(int i = 0; i < arraySize; i++)
+    for(int i = 0; i < results[0]; i++)
     {
-        if(results[i] >= 0){
-            correct++;
-            if(i==0){
-               printf("%d",results[i]);
-            }else{
-               printf(",%d",results[i]);
-            }
+        if(i==0){
+           printf("%d",results[i]);
+        }else{
+           printf(",%d",results[i]);
         }
     }
     printf("\n");
     
 
     // Print a brief summary detailing the results
-    printf("Computed '%d/%d' values to 1!\n", correct, arraySize);
     printf("TIME- %f\n",timeEnd);
     
     // Shutdown and cleanup

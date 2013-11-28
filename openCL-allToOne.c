@@ -34,10 +34,27 @@ int parseArgs(int argc, char * argv[]){
         printf("r - number of repititions greater than 0(to increase runtime)\n");
         printf("n - numbers to compute between 1 and 524288\n");
         printf("s - random seed (optional leave out to seed by time)\n");
-        printf("Example execution ./openCL-allToOne r1 n8 s3 > output.txt\n");
+        printf("Example execution ./openCL-allToOne r3 n524288 s3 > output.txt\n");
         return 1;
     }
     return 0;
+}
+
+void initData(int data[]){
+    if(seed==NULL){
+        srand(time(NULL));
+    }else{
+        srand(*seed);
+        free(seed);
+    }
+
+    for(int i = 0; i < DATA_SIZE; i++) {
+        if(i<arraySize){
+            data[i] = (rand()%1000000)+1;
+        }else{
+            data[i] = -1;
+        }
+    }
 }
 
 int main(int argc, char *argv[]){
@@ -63,25 +80,9 @@ int main(int argc, char *argv[]){
     if(parseArgs(argc, argv)){
         return 0;
     }
-    //print("%d %d %d",arraySize,rep,*seed);
     // Fill our data set with random int values
     unsigned int count = DATA_SIZE;
-
-    if(seed==NULL){
-        srand(time(NULL));
-    }else{
-        srand(*seed);
-        free(seed);
-    }
-
-    for(int i = 0; i < count; i++) {
-        if(i<arraySize){
-            data[i] = (rand()%1000000)+1;
-        }else{
-            data[i] = -1;
-        }
-    }
-
+    
 
 	////////////////////////////////////////////////////////////////////////////////
 	 
@@ -163,6 +164,7 @@ int main(int argc, char *argv[]){
     }
     timer t = createTimer();
     for(int i =0;i<rep;i++){
+        initData(data);
         // Write our data set into the input array in device memory 
         //
         err = clEnqueueWriteBuffer(commands, input, CL_TRUE, 0, sizeof(float) * count, data, 0, NULL, NULL);
