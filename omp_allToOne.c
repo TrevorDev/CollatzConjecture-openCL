@@ -3,209 +3,161 @@
 #include <omp.h>
 #include <time.h>
 
-void InitializeData(int size);
-void printData(int size);
+int parseArgs(int argc, char * argv[]);
+void InitializeData();
+void printData();
 void writeToFile();
 int collatz(int number);
 
-int steps = 0, limit = 0, percent = 0;
 
-/*
-pN: no. of processors (threads) to use
-sN: optional random seed
-aN: size of array
-
-*/
-
-int pN, sN;
-int *data;
+int arraySize = 1;
+int rep = 1;
+int *seed = NULL;
+int *input, *output;
 
 int main(int argc, char *argv[])
 {
-  int i;
+  int i, j, cur, counter, correct;
   double start, stop;
-  int size, counter, findNum;
-  int nthreads, tid;
-  int position;
-  findNum = 0;
-  size = 0;
-  if (argc == 1)
+
+  if (parseArgs(argc, argv))
   {
-    printf("please provide correct arguments\n");
-    printf("'p' for process, 'f' for aiming number to find, 's' for seed, 'a' for array size\n");
-    printf("eg: pN fN or (aN and sN) (Replace N with number)\n");
-    exit(0);
+    return 0;
   }
 
-  for (i = 1; i < argc; i++)
-  {
-    if (argv[i][0] == 'p')
-    {
-      pN = atoi(++argv[i]);
-      continue;
-    }
-
-    if (argv[i][0] == 'f')
-    {
-      findNum = atoi(++argv[i]);
-      continue;
-    }
-
-    if (argv[i][0] == 's')
-    {
-      sN = atoi(++argv[i]);
-      continue;
-    }
-
-    if (argv[i][0] == 'a')
-    {
-      size = atoi(++argv[i]);
-      continue;
-    }
-  }
   start = omp_get_wtime();
-  size = 1024;
-  data = (int *) malloc (size*sizeof(int));
-  data[0] = 2;
-  position = 1;
-  for (i = 0; i < size; i++)
-  {
-    if (data[i] != 0)
-    {
-      if(data[i] % 2 == 0) 
-      {
-        data[position++] = data[i]*2;
-      }
-      if(((data[i] - 1) / 3 ) % 2 != 0)
-      {
-        data[position++] = (data[i] - 1) / 3;
-      }
-    }
-  }
-  for (i = 0; i < size; i++)
-  {
-    printf("%d ",data[i]);
-  }
-  printf("\n%d\n",position);
+  InitializeData();
 
-  /*
-  if (findNum == 0)
+  correct = 0;
+
+  for(int i = 0; i < arraySize; i++)
   {
-    InitializeData(size);
-    printData(size);
-    omp_set_num_threads(pN);
+      if(input[i] >= 1){
+          printf("%d ",input[i]);
+      }
+  }
+  omp_set_num_threads(16);
     
-    #pragma omp parallel for private(i, counter)
-    for (i = 0; i < size; i++)
+  for (i = 0; i < rep; i++)
+  {
+    #pragma omp parallel for private(j, counter, cur)
+    for (j = 0; j < arraySize; j++)
     {
       counter=0;
-      while(data[i] != 1)
+      cur = input[j];
+      while(cur != 1)
       {
         counter++;
-        if(data[i] % 2 == 0) 
+        if(cur % 2 == 0) 
         {
-          data[i] = data[i] / 2;
+          cur = cur / 2;
         }
         else 
         {
-          data[i] = (data[i] * 3) + 1;
+          cur = (cur * 3) + 1;
         }
-        if (counter > 25)
+        if (counter > 10000)
         {
-          data[i] = 0;
+          counter = -1;
+          printf("input:%d\n",input[j]);
           break;
         } 
+        /*if (counter > 1000000)
+        {
+          printf("input:%d %d\n",input[j], cur);
+        } */
       }
+      output[j] = counter;
     }
-
-    printData(size);
   }
-  else
+
+ //printData();
+
+  // Validate our results
+  correct = 0;
+
+  for(int i = 0; i < arraySize; i++)
   {
-    size = 1024;
-    data = (int *) malloc (size*sizeof(int));
-    data[0] = 2;
-    position = 1;
-    for (i = 0; i < size; i++)
-    {
-      if(data[i] % 2 == 0) 
-      {
-        data[position++] = data[i]*2;
+      if(output[i] >= 0){
+          correct++;
+          //printf("%d ",output[i]);
       }
-      else
-      {
-        data[position++] = (data[i] - 1) / 3;
-      }
-    }
-
   }
-  */
-  // writing
-  
-  for (i = 1; i < argc; i++)
-    printf("%s ",--argv[i]);
-  printf(" ");
+  printf("\n");
   stop = omp_get_wtime();
-  //printf("Iterations: %d Termination Percent: %d Time: %f\n", steps, percent, (double)(stop - start));
+  // Print a brief summary detailing the results
+  printf("Computed '%d/%d' values to 1!\n", correct, arraySize);
+  printf("TIME- %f\n",(double)(stop - start));
   //writeToFile();
   return 0;
 }
 
-void InitializeData(int size)
+int parseArgs(int argc, char * argv[]){
+    int repSet = 0;
+    int sizeSet = 0;
+    for(int i=0;i<argc;i++){
+        int num = atoi(argv[i]+1);
+        switch( argv[i][0] ) 
+        {
+        case 's':
+            seed = calloc(1,sizeof(int));
+            *seed=num;
+            break;
+        case 'n':
+            arraySize=num;
+            sizeSet=1;
+            break;
+        case 'r':
+            rep=num;
+            repSet=1;
+            break;
+        default :
+            break;
+        }
+    }
+    if(!sizeSet || !repSet || arraySize<=0 || rep<=0){
+        printf("Invalid arguments, expected 2 or 3 args:\n");
+        printf("r - number of repititions greater than 0(to increase runtime)\n");
+        printf("n - numbers to compute between 1 and 524288\n");
+        printf("s - random seed (optional leave out to seed by time)\n");
+        printf("Example execution ./openCL-allToOne r3 n524288 s3 > output.txt\n");
+        return 1;
+    }
+    return 0;
+}
+
+void InitializeData()
 {
-  int i, r;
-  data = (int *) malloc (size*sizeof(int));
+  int i;
+  input = (int *) malloc (arraySize*sizeof(int));
+  output = (int *) calloc (arraySize, sizeof(int));
   
-  if (sN != -1)
+  if(seed==NULL)
   {
-    srand(sN);
+    srand(time(NULL));
   }
   else
   {
-    srand((unsigned)time(NULL));
+    srand(*seed);
   }
 
-  for (i = 0; i < size; i++)
+  for (i = 0; i < arraySize; i++)
   {
-      r = rand()%10000;
-      data[i] = r;
+      input[i] = (rand()%100000)+1;
   }
 }
 
-void printData(int size)
+void printData()
 {
   int i;
 
-  for (i = 0; i < size; i++)
+  for (i = 0; i < arraySize; i++)
   {
-    printf("%d ", data[i]);
+    printf("%d ", output[i]);
   }
   printf("\n");
 }
 
-int collatz(int number)
-{
-  int counter=0;
-  while(number!=1)
-  {
-    counter++;
-    if(number%2 == 0) 
-    {
-      number = number / 2;
-    }
-    else 
-    {
-      number = (number*3) + 1;
-    }
-    if (counter > 25)
-    {
-      counter = 0;
-      break;
-    } 
-  }
-
-  return counter;
-}
 /*
 void writeToFile()
 {

@@ -39,7 +39,8 @@ prog : build
 
 build: $(SOURCE)
 	$(CC) $(CFLAGS) -c $(SOURCE) $(INCLUDES)
-
+omp:
+	$(CC) $(CFLAGS) -o omp_allToOne -fopenmp omp_allToOne.c
 clean:
 	@ rm *.o
 

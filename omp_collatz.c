@@ -82,12 +82,13 @@ int main(int argc, char *argv[])
       }
     }
   }
+  /*
   for (i = 0; i < size; i++)
   {
     printf("%d ",data[i]);
   }
   printf("\n%d\n",position);
-
+  */
   /*
   if (findNum == 0)
   {
