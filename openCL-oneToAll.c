@@ -69,10 +69,8 @@ int main(int argc, char *argv[]){
     //print("%d %d %d",arraySize,rep,*seed);
     // Fill our data set with random int values
     unsigned int count = DATA_SIZE;
-
-
-
-    //printf("%d", data[0]);
+    //set result incase d = 0
+    initData(results);
 
 	////////////////////////////////////////////////////////////////////////////////
 	 
