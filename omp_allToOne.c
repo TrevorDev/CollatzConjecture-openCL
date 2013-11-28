@@ -135,7 +135,7 @@ void InitializeData()
 
   for (i = 0; i < arraySize; i++)
   {
-      input[i] = (rand()%100000000)+1;
+      input[i] = (rand()%1000000)+1;
       printf("%d ",input[i]);
   }
   printf("\n");
