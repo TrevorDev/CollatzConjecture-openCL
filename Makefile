@@ -15,7 +15,7 @@ SRCDIR = ./
 #Put the names of your source code files in the lines below.  You will need both your
 # Solution source code file and the source code with the main program in it
 
-SOURCE = $(SRCDIR)collatz.c $(SRCDIR)dlxlib.c
+SOURCE = $(SRCDIR)openCL-allToOne.c $(SRCDIR)dlxlib.c
 
 
 #The list of object files for each program is below.  
@@ -23,10 +23,10 @@ SOURCE = $(SRCDIR)collatz.c $(SRCDIR)dlxlib.c
 # except with .o instead of .c.   Make changes as appropriate
 
 
-OBJS    = collatz.o dlxlib.o
+OBJS    = openCL-allToOne.o dlxlib.o
 
 
-PROGNAME = $(BINDIR)collatz
+PROGNAME = $(BINDIR)openCL-allToOne
 
 default : all
 

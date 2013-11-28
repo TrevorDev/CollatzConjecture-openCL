@@ -7,6 +7,8 @@ int rep = 1;
 int * seed = NULL;
 
 int parseArgs(int argc, char * argv[]){
+    int repSet = 0;
+    int sizeSet = 0;
     for(int i=0;i<argc;i++){
         int num = atoi(argv[i]+1);
         switch( argv[i][0] ) 
@@ -17,13 +19,23 @@ int parseArgs(int argc, char * argv[]){
             break;
         case 'n':
             arraySize=num;
+            sizeSet=1;
             break;
         case 'r':
             rep=num;
+            repSet=1;
             break;
         default :
             break;
         }
+    }
+    if(!sizeSet || !repSet){
+        printf("Invalid arguments, expected 2 or 3 args:\n");
+        printf("r - number of repititions greater than 0(to increase runtime)\n");
+        printf("n - numbers to compute between 1 and 524288\n");
+        printf("s - random seed (optional leave out to seed by time)\n");
+        printf("Example execution ./openCL-allToOne r1 n8 s3 > output.txt\n");
+        return 1;
     }
     return 0;
 }
@@ -48,7 +60,9 @@ int main(int argc, char *argv[]){
     cl_mem input;                       // device memory used for the input array
     cl_mem output;                      // device memory used for the output array
     
-    parseArgs(argc, argv);
+    if(parseArgs(argc, argv)){
+        return 0;
+    }
     //print("%d %d %d",arraySize,rep,*seed);
     // Fill our data set with random int values
     unsigned int count = DATA_SIZE;
@@ -224,8 +238,8 @@ int main(int argc, char *argv[]){
     
 
     // Print a brief summary detailing the results
-    printf("Computed '%d/%d' correct values!\n", correct, arraySize);
-    print("TIME- %f",timeEnd);
+    printf("Computed '%d/%d' values to 1!\n", correct, arraySize);
+    printf("TIME- %f\n",timeEnd);
     
     // Shutdown and cleanup
     clReleaseMemObject(input);
