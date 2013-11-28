@@ -29,7 +29,7 @@ int parseArgs(int argc, char * argv[]){
             break;
         }
     }
-    if(!sizeSet || !repSet || arraySize<=0 || arraySize > 524288 || rep<=0){
+    if(!sizeSet || !repSet){
         printf("Invalid arguments, expected 2 or 3 args:\n");
         printf("r - number of repititions greater than 0(to increase runtime)\n");
         printf("n - numbers to compute between 1 and 524288\n");
@@ -67,18 +67,11 @@ int main(int argc, char *argv[]){
     // Fill our data set with random int values
     unsigned int count = DATA_SIZE;
 
-    if(seed==NULL){
-        srand(time(NULL));
-    }else{
-        srand(*seed);
-        free(seed);
-    }
-
     for(int i = 0; i < count; i++) {
-        if(i<arraySize){
-            data[i] = (rand()%1000000)+1;
+        if(i==0){
+            data[i] = 1;
         }else{
-            data[i] = -1;
+            data[i] = 0;
         }
     }
 
@@ -144,7 +137,7 @@ int main(int argc, char *argv[]){
  
     // Create the compute kernel in the program we wish to run
     //
-    kernel = clCreateKernel(program, "allToOne", &err);
+    kernel = clCreateKernel(program, "oneToAll", &err);
     if (!kernel || err != CL_SUCCESS)
     {
         printf("Error: Failed to create compute kernel!\n");
@@ -153,7 +146,6 @@ int main(int argc, char *argv[]){
 
 
     // Create the input and output arrays in device memory for our calculation
-    //
     input = clCreateBuffer(context,  CL_MEM_READ_ONLY,  sizeof(float) * count, NULL, NULL);
     output = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(float) * count, NULL, NULL);
     if (!input || !output)
