@@ -15,6 +15,7 @@ date: Nov 11 2013
 #include <errno.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <time.h>    // time()
 
 typedef struct vector {
    void * ar;

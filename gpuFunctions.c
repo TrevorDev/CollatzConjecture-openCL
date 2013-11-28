@@ -4,17 +4,22 @@ __kernel void square(__global int* input,__global int* output,const unsigned int
 	int i = get_global_id(0);
 	if(i < count) {
 		cur = input[i];
-		while(cur!=1){
-			counter++;
-			if(cur%2==0){
-				cur=cur/2;
-			}else{
-				cur=(cur*3)+1;
+		if(cur==-1){
+			output[i] = -1;
+		}else{
+			while(cur!=1){
+				counter++;
+				if(cur%2==0){
+					cur=cur/2;
+				}else{
+					cur=(cur*3)+1;
+				}
+				if(counter>100000){
+					break;
+				}
 			}
-			if(counter>25){
-				break;
-			}
+			output[i] = counter;
 		}
-		output[i] = counter;
+		
 	}
 }
