@@ -45,15 +45,18 @@ void initData(int data[]){
         srand(time(NULL));
     }else{
         srand(*seed);
+        printf("%d\n",*seed);
     }
 
     for(int i = 0; i < DATA_SIZE; i++) {
         if(i<arraySize){
             data[i] = (rand()%1000000)+1;
+            printf("%d ", data[i]);
         }else{
             data[i] = -1;
         }
     }
+    printf("\n");
 }
 
 int main(int argc, char *argv[]){

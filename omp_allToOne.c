@@ -46,16 +46,11 @@ int main(int argc, char *argv[])
         {
           cur = (cur * 3) + 1;
         }
-        if (counter > 10000)
+        if (counter > 100000)
         {
           counter = -1;
-          printf("input:%d\n",input[j]);
           break;
         } 
-        /*if (counter > 1000000)
-        {
-          printf("input:%d %d\n",input[j], cur);
-        } */
       }
       output[j] = counter;
     }
@@ -64,7 +59,6 @@ int main(int argc, char *argv[])
 
   // Validate our results
   correct = 0;
-
   for(int i = 0; i < arraySize; i++)
   {
       if(output[i] >= 0)
@@ -136,10 +130,13 @@ void InitializeData()
   else
   {
     srand(*seed);
+    printf("%d\n",*seed);
   }
 
   for (i = 0; i < arraySize; i++)
   {
       input[i] = (rand()%100000000)+1;
+      printf("%d ",input[i]);
   }
+  printf("\n");
 }

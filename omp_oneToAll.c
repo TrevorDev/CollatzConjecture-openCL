@@ -14,7 +14,7 @@ int *input, *output;
 
 int main(int argc, char *argv[])
 {
-  int i, j, counter, correct;
+  int i, j, k, altPos, correct;
   double start, stop;
   uint64_t cur;
   if (parseArgs(argc, argv))
@@ -27,49 +27,38 @@ int main(int argc, char *argv[])
 
   correct = 0;
   omp_set_num_threads(16);
-    
-  for (i = 0; i < rep; i++)
+  
+  for (k = 0; k < rep; k++)
   {
-    #pragma omp parallel for private(j, counter, cur)
-    for (j = 0; j < arraySize; j++)
+    for (j = 0; j < depth; j++)
     {
-      counter=0;
-      cur = input[j];
-      while(cur != 1)
+      for (i = 0; i < input[0]; i++)
       {
-        counter++;
-        if(cur % 2 == 0) 
+        altPos = input[0]+i;
+        cur = input[i];
+        if(cur!=0)
         {
-          cur = cur / 2;
+          if(cur!=1&&(cur-1)%3==0)
+          {
+            if((cur-1)/3!=1)
+            {
+              output[altPos]=(cur-1)/3;
+            }       
+          }
+          output[i] = cur*2;
         }
-        else 
-        {
-          cur = (cur * 3) + 1;
-        }
-        if (counter > 10000)
-        {
-          counter = -1;
-          printf("input:%d\n",input[j]);
-          break;
-        } 
-        /*if (counter > 1000000)
-        {
-          printf("input:%d %d\n",input[j], cur);
-        } */
       }
-      output[j] = counter;
+      for (i = 0; i < input[0]; i++)
+      {
+        input[i] = output[i];
+      }
     }
   }
 
-
-  // Validate our results
-  correct = 0;
-
-  for(int i = 0; i < arraySize; i++)
+  for(int i = 0; i < output[0]; i++)
   {
       if(output[i] >= 0)
       {
-          correct++;
           if(i==0)
           {
              printf("%d",output[i]);
@@ -82,10 +71,8 @@ int main(int argc, char *argv[])
   }
   printf("\n");
   stop = omp_get_wtime();
-  // Print a brief summary detailing the results
-  printf("Computed '%d/%d' values to 1!\n", correct, arraySize);
   printf("TIME- %f\n",(double)(stop - start));
-  //writeToFile();
+
   return 0;
 }
 
@@ -120,7 +107,6 @@ int parseArgs(int argc, char * argv[]){
 
 void InitializeData()
 {
-  int i;
   input = (int *) calloc (DATA_SIZE, sizeof(int));
   output = (int *) calloc (DATA_SIZE, sizeof(int));
 
