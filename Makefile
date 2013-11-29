@@ -30,8 +30,7 @@ PROGNAME = $(BINDIR)openCL-allToOne
 
 default : all
 
-all : prog
-
+all : prog omp
 
 prog : build
 	$(CC) $(LIBDIRS) $(LDFLAGS) -o $(PROGNAME) openCL-allToOne.o $(OBJS) $(LIBS)

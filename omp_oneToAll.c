@@ -10,33 +10,34 @@ void InitializeData();
 
 int depth = 1;
 int rep = 1;
+int pN = 8;
 int *input, *output;
 
 int main(int argc, char *argv[])
 {
-  int i, j, k, altPos, correct;
+  int i, j, k, altPos;
   double start, stop;
-  uint64_t cur;
+  unsigned int cur;
   if (parseArgs(argc, argv))
   {
     return 0;
   }
 
   start = omp_get_wtime();
-  InitializeData();
 
-  correct = 0;
-  omp_set_num_threads(16);
+  omp_set_num_threads(pN);
   
   for (k = 0; k < rep; k++)
   {
+    InitializeData();
     for (j = 0; j < depth; j++)
     {
+      #pragma omp parallel for private(altPos, cur, i)
       for (i = 0; i < input[0]; i++)
       {
         altPos = input[0]+i;
         cur = input[i];
-        if(cur!=0)
+        if (cur != 0)
         {
           if(cur!=1&&(cur-1)%3==0)
           {
@@ -54,7 +55,8 @@ int main(int argc, char *argv[])
       }
     }
   }
-
+  stop = omp_get_wtime();
+  
   for(int i = 0; i < output[0]; i++)
   {
       if(output[i] >= 0)
@@ -70,7 +72,6 @@ int main(int argc, char *argv[])
       }
   }
   printf("\n");
-  stop = omp_get_wtime();
   printf("TIME- %f\n",(double)(stop - start));
 
   return 0;
@@ -91,6 +92,9 @@ int parseArgs(int argc, char * argv[]){
             rep=num;
             repSet=1;
             break;
+        case 'p':
+            pN=num;
+            break;
         default :
             break;
         }
@@ -99,6 +103,7 @@ int parseArgs(int argc, char * argv[]){
         printf("Invalid arguments, expected 2 args:\n");
         printf("r - number of repititions greater than 0(to increase runtime)\n");
         printf("d - depth of reverse collatz tree to print out between 1 and 19\n");
+        printf("p - number of processors\n");
         printf("Example execution ./openCL-allToOne r1 d8 > output.txt\n");
         return 1;
     }

@@ -1,5 +1,5 @@
 __kernel void allToOne(__global int* input,__global int* output,const unsigned int count){
-	int cur;
+	unsigned int cur;
 	int counter=0;
 	int i = get_global_id(0);
 	if(i < count) {
@@ -25,7 +25,7 @@ __kernel void allToOne(__global int* input,__global int* output,const unsigned i
 }
 
 __kernel void oneToAll(__global int* input,__global int* output,const unsigned int count){
-	int cur;
+	unsigned int cur;
 	int i = get_global_id(0);
 	int altPos = input[0]+i;
 	if(i < count) {
